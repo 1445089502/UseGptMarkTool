@@ -1,0 +1,175 @@
+// ==UserScript==
+// @name         采集VTuber数据并保存到Excel
+// @namespace    http://tampermonkey.net/
+// @version      1.9
+// @description  隐藏包含指定文本的 div 元素，并自动加载更多内容，将数据保存到Excel文档中
+// @author       你
+// @match        https://hololist.net/*
+// @grant        none
+// @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // 配置要隐藏的文本
+    const textsToHide = [
+        'hololive production',
+        'Hololive生产',
+        'NIJISANJI Project'
+    ];
+
+    let autoNextEnabled = true;
+    const delay = 5000; // 每个页面停留的时间，毫秒为单位
+    let countdownInterval;
+
+    // 创建控制按钮和倒计时显示
+    const button = document.createElement('button');
+    const countdownDisplay = document.createElement('span');
+
+    button.innerText = '停止自动加载';
+    button.style.position = 'fixed';
+    button.style.bottom = '10px';
+    button.style.right = '10px';
+    button.style.zIndex = '1000';
+    button.style.padding = '10px';
+    button.style.backgroundColor = '#007BFF';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '5px';
+    button.style.cursor = 'pointer';
+    button.onclick = async () => {
+        autoNextEnabled = !autoNextEnabled;
+        button.innerText = autoNextEnabled ? '停止自动加载' : '自动加载下一页';
+        countdownDisplay.innerText = '';
+        if (autoNextEnabled) {
+            autoLoadNextPage();
+        } else {
+            clearInterval(countdownInterval);
+            await saveData(); // 保存数据和下载图片
+        }
+    };
+
+    countdownDisplay.style.position = 'fixed';
+    countdownDisplay.style.bottom = '10px';
+    countdownDisplay.style.right = '150px';
+    countdownDisplay.style.zIndex = '1000';
+    countdownDisplay.style.padding = '10px';
+    countdownDisplay.style.backgroundColor = '#f0f0f0';
+    countdownDisplay.style.color = 'black';
+    countdownDisplay.style.border = '1px solid #ccc';
+    countdownDisplay.style.borderRadius = '5px';
+
+    document.body.appendChild(button);
+    document.body.appendChild(countdownDisplay);
+
+    // 创建数据数组
+    let data = [["图片", "名字", "所属社团"]];
+    let imageData = [];
+
+    // 隐藏匹配的 div 元素的函数
+    function hideDivs() {
+        const divs = document.querySelectorAll('div.col-6.col-sm-3.col-lg-1');
+        divs.forEach(div => {
+            textsToHide.forEach(text => {
+                if (div.innerText.includes(text)) {
+                    div.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // 采集数据的函数
+    function collectData() {
+        const vtubers = document.querySelectorAll('div.col-6.col-sm-3.col-lg-1');
+        vtubers.forEach(vtuber => {
+            const img = vtuber.querySelector('img').src;
+            const name = vtuber.querySelector('div.text-center > a').innerText.trim();
+            const group = vtuber.querySelector('div.small').innerText.trim();
+            const imgFileName = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
+            data.push([`images/${imgFileName}`, name, group]);
+            imageData.push({ url: img, name: imgFileName });
+        });
+    }
+
+    // 自动点击下一页按钮加载更多内容
+    function autoLoadNextPage() {
+        if (!autoNextEnabled) return;
+        const currentPage = document.querySelector('li.page-item.active');
+        if (currentPage) {
+            const nextPage = currentPage.nextElementSibling;
+            if (nextPage && nextPage.querySelector('a.page-link')) {
+                let timeLeft = delay / 1000;
+                countdownDisplay.innerText = `下一页将在 ${timeLeft} 秒后加载`;
+
+                countdownInterval = setInterval(() => {
+                    timeLeft -= 1;
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        nextPage.querySelector('a.page-link').click();
+                        setTimeout(() => {
+                            hideDivs();
+                            collectData();
+                            autoLoadNextPage();
+                        }, 500); // 适当延迟以确保页面加载完成
+                    } else {
+                        countdownDisplay.innerText = `下一页将在 ${timeLeft} 秒后加载`;
+                    }
+                }, 1000);
+            }
+        }
+    }
+
+    // 初始化函数
+    function init() {
+        hideDivs();
+        collectData();
+
+        const observer = new MutationObserver(() => {
+            hideDivs();
+            collectData();
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        autoLoadNextPage(); // 页面加载时立即开始倒计时
+    }
+
+    // 下载图片的函数
+    async function downloadImages() {
+        const zip = new JSZip();
+        const imgFolder = zip.folder("images");
+        for (const img of imageData) {
+            const response = await fetch(img.url);
+            const blob = await response.blob();
+            imgFolder.file(img.name, blob);
+        }
+        return zip.generateAsync({ type: "blob" });
+    }
+
+    // 将数据保存为Excel文件
+    async function saveData() {
+        if (data.length === 1) return; // 没有数据时不保存
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const today = new Date().toISOString().split('T')[0];
+        XLSX.utils.book_append_sheet(wb, ws, 'VTubers');
+        XLSX.writeFile(wb, `${today}.xlsx`);
+
+        // 保存到 "vtuber_all.xlsx"
+        const allDataFile = 'vtuber_all.xlsx';
+        const allDataWb = XLSX.utils.book_new();
+        const allDataWs = XLSX.utils.aoa_to_sheet(data);
+        XLSX.utils.book_append_sheet(allDataWb, allDataWs, 'VTubers');
+        XLSX.writeFile(allDataWb, allDataFile);
+
+        const imagesBlob = await downloadImages();
+        saveAs(imagesBlob, "images.zip");
+    }
+
+    // 运行初始化函数
+    init();
+})();
