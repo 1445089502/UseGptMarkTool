@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         隐藏指定元素（自动配置加载）
 // @namespace    http://tampermonkey.net/
-// @version      1.4
-// @description  根据 URL 自动加载配置并隐藏元素。支持撤回、重做、保存、查看等功能。
+// @version      1.6
+// @description  根据 URL 自动加载配置并隐藏元素。支持撤回、重做、保存、查看、延迟隐藏等功能。
 // @author       诗薰 && ChatGPT
 // @match        *://*/*
 // @grant        none
@@ -11,7 +11,7 @@
 (function () {
     'use strict';
 
-    // === 自动配置映射（可扩展多个网站） ===
+    // === 自动配置映射 ===
     const hardcodedConfigMap = [
         {
             matchType: 'exact',
@@ -20,13 +20,16 @@
         },
         {
             matchType: 'prefix',
-            pattern: 'https://baidu.com/',
-            configUrl: 'https://192.168.50.51/SelfTsukuru/TampermonkeyConfig/baidu.json'
+            pattern: 'https://5xsq.com/',
+            configUrl: 'https://192.168.50.51/SelfTsukuru/TampermonkeyConfig/5xsq.json'
+        },
+        {
+            matchType: 'prefix',
+            pattern: 'https://guangdongvideo.com/adult/',
+            configUrl: 'https://192.168.50.51/SelfTsukuru/TampermonkeyConfig/fc2.json'
         }
-        // 可以继续添加其他网站配置
     ];
 
-      // === 调试日志函数 ===
     function log(msg, ...args) {
         console.log('[隐藏元素]', msg, ...args);
     }
@@ -37,7 +40,7 @@
     let actionList = [];
     let currentIndex = -1;
 
-    // UI 元素
+    // === UI 创建 ===
     const buttonContainer = document.createElement('div');
     buttonContainer.style.position = 'fixed';
     buttonContainer.style.bottom = '10px';
@@ -64,7 +67,8 @@
         { text: '保存配置', action: saveConfig },
         { text: '加载配置', action: openConfigFile },
         { text: '查看配置', action: logCurrentConfig },
-        { text: '历史记录', action: viewActionHistory }
+        { text: '历史记录', action: viewActionHistory },
+        { text: '延迟隐藏', action: delayedToggle }
     ];
 
     actions.forEach(({ text, action }) => {
@@ -77,7 +81,6 @@
     });
 
     document.body.appendChild(buttonContainer);
-
     toggleButton.addEventListener('click', () => {
         panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
     });
@@ -88,12 +91,11 @@
         }
     });
 
-    // === 功能函数 ===
+    // === 功能 ===
     function promptClassNameAndParent() {
         const input = prompt("请输入要隐藏的元素的类名，用空格或回车分隔:");
         const newClassNames = input.split(/\s+/).filter(name => name.trim() !== '');
         const newParentLevels = parseInt(prompt("请输入要隐藏的父级数:"), 10);
-
         if (newClassNames.length > 0 && newParentLevels >= 0) {
             newClassNames.forEach(className => {
                 classNamesMap.set(className, newParentLevels);
@@ -107,10 +109,11 @@
 
     function toggleElements(classNamesToToggle, parentLevelsToToggle) {
         if (classNamesToToggle.length === 0 || parentLevelsToToggle < 0) return;
-
         const currentState = [];
+
         classNamesToToggle.forEach(className => {
             const elements = document.querySelectorAll(`.${className}`);
+            console.log(`🔍 查找类名 .${className}，找到 ${elements.length} 个元素`);
             elements.forEach(function (element) {
                 let parent = element;
                 for (let i = 0; i < parentLevelsToToggle; i++) {
@@ -118,13 +121,16 @@
                 }
                 if (parent) {
                     currentState.push({ element: parent, display: parent.style.display });
-                    parent.style.display = hidden ? 'none' : '';
+                    if (hidden) {
+                        parent.style.setProperty('display', 'none', 'important');
+                    } else {
+                        parent.style.removeProperty('display');
+                    }
                 }
             });
         });
 
         previousState.push([...currentState]);
-        logCurrentConfig();
     }
 
     function undoLastAction() {
@@ -157,7 +163,7 @@
     }
 
     function viewActionHistory() {
-        console.log('行为记录:', actionList);
+        console.log('📜 行为记录:', actionList);
     }
 
     function openConfigFile() {
@@ -194,7 +200,7 @@
     }
 
     function logCurrentConfig() {
-        console.log('当前配置:', [...classNamesMap]);
+        console.log('⚙️ 当前配置:', [...classNamesMap]);
     }
 
     function getFileName() {
@@ -202,7 +208,7 @@
         return `${hostname}.json`;
     }
 
-    // === 自动加载 JSON 配置 ===
+    // === 自动加载配置逻辑 ===
     function fetchAndApplyConfig(url) {
         fetch(url)
             .then(res => {
@@ -211,19 +217,21 @@
             })
             .then(data => {
                 applyConfig(data);
-                console.log('已自动加载配置:', data);
+                console.log('✅ 自动加载配置成功:', data);
             })
             .catch(err => {
-                console.error('自动加载配置失败:', err);
+                console.error('❌ 自动加载配置失败:', err);
             });
     }
 
     function applyConfig(data) {
         if (data.classNamesMap && Array.isArray(data.classNamesMap)) {
-            classNamesMap = new Map(data.classNamesMap);
-            classNamesMap.forEach((parentLevels, className) => {
-                toggleElements([className], parentLevels);
+            classNamesMap.clear();
+            data.classNamesMap.forEach(([className, parentLevel]) => {
+                classNamesMap.set(className, parentLevel);
+                toggleElements([className], parentLevel);
             });
+            logCurrentConfig();
         }
     }
 
@@ -234,13 +242,30 @@
                 (rule.matchType === 'exact' && currentUrl === rule.pattern) ||
                 (rule.matchType === 'prefix' && currentUrl.startsWith(rule.pattern))
             ) {
-                console.log(`匹配规则成功，正在加载配置: ${rule.configUrl}`);
+                console.log(`🧩 匹配规则成功，正在加载配置: ${rule.configUrl}`);
                 fetchAndApplyConfig(rule.configUrl);
                 break;
             }
         }
     }
 
-    // 页面加载后执行自动加载逻辑
+    // ✅ 延迟隐藏功能
+    function delayedToggle() {
+        const delaySeconds = parseInt(prompt("延迟多少秒后执行隐藏？", "1"), 10);
+        if (isNaN(delaySeconds) || delaySeconds < 0) {
+            alert("请输入有效的数字！");
+            return;
+        }
+
+        console.log(`⏳ ${delaySeconds} 秒后开始执行隐藏...`);
+        setTimeout(() => {
+            classNamesMap.forEach((parentLevel, className) => {
+                toggleElements([className], parentLevel);
+            });
+            console.log('✅ 延迟隐藏执行完毕');
+        }, delaySeconds * 1000);
+    }
+
+    // 页面加载完成后自动检查
     window.addEventListener('load', checkAndAutoLoadConfig);
 })();
