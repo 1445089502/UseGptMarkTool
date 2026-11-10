@@ -1,0 +1,10 @@
+<!-- 应用图标：蓝色文件夹与放大镜，表示检查文件和文件夹占用。 -->
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <path fill="#174c78" d="M24 71 Q24 51 44 51 H90 L110 72 H198 Q218 72 218 92 V193 Q218 213 198 213 H44 Q24 213 24 193Z"/>
+  <path fill="#3185c6" d="M24 99 Q24 87 38 87 H204 Q218 87 218 101 V193 Q218 213 198 213 H44 Q24 213 24 193Z"/>
+  <path d="M49 111 H112" fill="none" stroke="#c1e7ff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M181 181 L225 225" fill="none" stroke="#102e46" stroke-width="25" stroke-linecap="round"/>
+  <circle cx="156" cy="154" r="48" fill="#f7fbff" stroke="#102e46" stroke-width="13"/>
+  <circle cx="156" cy="154" r="30" fill="#dbf1ff"/>
+  <path d="M141 145 Q148 133 162 134" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+</svg>
