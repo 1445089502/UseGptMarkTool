@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 提供系统相册入口和首次使用说明。 -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_gallery" android:title="打开相册" app:showAsAction="never" />
+    <item android:id="@+id/action_help" android:title="使用说明" app:showAsAction="never" />
+</menu>

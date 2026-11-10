@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 保存助手使用书签和下载箭头组成的应用图标。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp" android:height="48dp" android:viewportWidth="48" android:viewportHeight="48">
+    <path android:fillColor="#176B50" android:pathData="M10,0h28a10,10 0,0 1,10 10v28a10,10 0,0 1,-10 10H10A10,10 0,0 1,0 38V10A10,10 0,0 1,10 0" />
+    <path android:fillColor="#FFFFFF" android:pathData="M13,10h22v29L24,33 13,39z" />
+    <path android:fillColor="#176B50" android:pathData="M22.5,15h3v8l3,-3 2,2 -6.5,6.5L17.5,22l2,-2 3,3z" />
+</vector>

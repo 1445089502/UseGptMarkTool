@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 按链接解析、内容选择和保存状态组织单页流程，并保留独立验证网页。 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:background="?attr/colorSurface">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
+        app:title="笔记保存" app:subtitle="图片与视频，按需保存" app:menu="@menu/main_actions" />
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:fillViewport="true" android:clipToPadding="false">
+        <LinearLayout android:id="@+id/content"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal" android:orientation="vertical"
+            android:paddingHorizontal="20dp" android:paddingBottom="28dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" android:text="保存小红书笔记"
+                android:textAppearance="?attr/textAppearanceHeadlineSmall" android:accessibilityHeading="true" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" android:layout_marginBottom="20dp"
+                android:text="直接粘贴分享文字，自动提取链接。"
+                android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorOnSurfaceVariant" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/link_layout" style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="笔记链接或整段分享文字" app:endIconMode="clear_text"
+                app:boxCornerRadiusTopStart="16dp" app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp" app:boxCornerRadiusBottomEnd="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/link_input" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="88dp" android:maxLines="3" android:maxLength="20000"
+                    android:gravity="top|start" android:inputType="textMultiLine|textNoSuggestions" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginTop="12dp">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/paste_button" android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:text="粘贴并解析" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/parse_button" style="@style/Widget.XhsSaver.TonalButton"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginStart="12dp" android:text="解析输入" />
+            </LinearLayout>
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.XhsSaver.MediaCard" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:padding="16dp">
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progress" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp" android:indeterminate="true" android:visibility="gone" />
+                    <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:accessibilityLiveRegion="polite" android:text="解析后可预览内容，再选择需要保存的图片和视频。"
+                        android:textAppearance="?attr/textAppearanceBodyMedium" android:textColor="?attr/colorOnSurfaceVariant" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:orientation="horizontal" android:gravity="end|center_vertical">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/cancel_parse" style="@style/Widget.XhsSaver.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:text="取消解析" android:visibility="gone" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/browser_toggle" style="@style/Widget.XhsSaver.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp" android:text="显示解析网页" android:visibility="gone" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <LinearLayout android:id="@+id/browser_panel" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="16dp" android:visibility="gone">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp" android:text="TapSave 解析网页 · 如有验证，请在下方完成"
+                    android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="?attr/colorOnSurfaceVariant" />
+                <FrameLayout android:id="@+id/browser_container" android:layout_width="match_parent"
+                    android:layout_height="400dp" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/download_panel" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="20dp" android:visibility="gone">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="保存进度" android:textAppearance="?attr/textAppearanceTitleSmall" android:accessibilityHeading="true" />
+                <TextView android:id="@+id/download_status" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" android:accessibilityLiveRegion="polite"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/download_progress" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp" android:max="100" android:indeterminate="true" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cancel_save" style="@style/Widget.XhsSaver.TextButton"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:layout_gravity="end" android:text="取消保存" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/results" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="24dp" android:visibility="gone">
+                <TextView android:id="@+id/result_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceTitleLarge" android:accessibilityHeading="true" />
+                <TextView android:id="@+id/result_summary" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp" android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
+                <LinearLayout android:id="@+id/selection_actions" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="8dp">
+                    <TextView android:id="@+id/selection_count" android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:textAppearance="?attr/textAppearanceLabelLarge" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/select_all" style="@style/Widget.XhsSaver.TextButton"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="取消全选" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/save_all" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp" android:text="保存选中内容" app:icon="@drawable/ic_download" />
+                <GridLayout android:id="@+id/resource_list" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:columnCount="2" android:alignmentMode="alignBounds" android:useDefaultMargins="false" />
+                <LinearLayout android:id="@+id/text_panel" android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="vertical" android:layout_marginTop="16dp" android:visibility="gone">
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="笔记文案" android:textAppearance="?attr/textAppearanceTitleMedium" android:accessibilityHeading="true" />
+                    <TextView android:id="@+id/note_text" android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" android:textIsSelectable="true" android:maxLines="6" android:ellipsize="end"
+                        android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/copy_text" style="@style/Widget.XhsSaver.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="复制文案" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/expand_text" style="@style/Widget.XhsSaver.TextButton"
+                            android:layout_width="wrap_content" android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp" android:text="展开全文" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+            <View android:layout_width="match_parent" android:layout_height="1dp"
+                android:layout_marginTop="24dp" android:background="?attr/colorOutlineVariant" />
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/overlay_switch" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="56dp" android:layout_marginTop="8dp" android:text="悬浮球快捷保存" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="复制链接后点悬浮球；可拖动，长按关闭。"
+                android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="?attr/colorOnSurfaceVariant" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" android:text="保存后可在系统相册的 XhsSaver 相册中查看。解析由 TapSave 提供，验证和可用结果以网页为准。"
+                android:textAppearance="?attr/textAppearanceBodySmall" android:textColor="?attr/colorOnSurfaceVariant" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

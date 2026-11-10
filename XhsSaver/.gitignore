@@ -1,0 +1,8 @@
+# 排除本机配置、缓存、安装包和签名文件。
+.gradle/
+.idea/
+**/build/
+local.properties
+*.iml
+*.jks
+*.keystore

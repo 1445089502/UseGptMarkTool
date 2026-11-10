@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 图片和视频共用的选择、预览及保存卡片。 -->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.XhsSaver.MediaCard"
+    android:layout_width="0dp" android:layout_height="wrap_content" android:clipToOutline="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:paddingBottom="4dp">
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/media_selected" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="48dp" android:paddingEnd="8dp" android:maxLines="2"
+            android:textAppearance="?attr/textAppearanceLabelLarge" app:useMaterialThemeColors="true" />
+        <FrameLayout android:id="@+id/media_preview" android:layout_width="match_parent"
+            android:layout_height="160dp" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/media_save" style="@style/Widget.XhsSaver.TonalButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp" android:layout_marginTop="4dp"
+            android:minHeight="48dp" android:text="保存" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

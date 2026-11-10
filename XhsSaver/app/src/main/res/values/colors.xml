@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 浅色界面按操作层级定义颜色角色。 -->
+<resources>
+    <color name="primary">#176B50</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#D5EDE0</color>
+    <color name="on_primary_container">#103D2D</color>
+    <color name="secondary">#516559</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="secondary_container">#D4E9DC</color>
+    <color name="on_secondary_container">#102D20</color>
+    <color name="surface">#FAFCFA</color>
+    <color name="surface_container_low">#F3F7F3</color>
+    <color name="surface_container">#EDF3ED</color>
+    <color name="surface_container_high">#E6EEE7</color>
+    <color name="surface_container_highest">#DEE8DF</color>
+    <color name="surface_variant">#E0E8E1</color>
+    <color name="on_surface">#1A2922</color>
+    <color name="on_surface_variant">#4D5F54</color>
+    <color name="outline">#75877C</color>
+    <color name="outline_variant">#C5D1C8</color>
+    <color name="error">#B3261E</color>
+    <color name="on_error">#FFFFFF</color>
+    <color name="error_container">#F9DEDC</color>
+    <color name="on_error_container">#410E0B</color>
+</resources>

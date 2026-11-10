@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 深色界面保持相同的语义和文字对比。 -->
+<resources>
+    <color name="primary">#91D5B4</color>
+    <color name="on_primary">#003825</color>
+    <color name="primary_container">#13513C</color>
+    <color name="on_primary_container">#C2F2DB</color>
+    <color name="secondary">#B4CEBF</color>
+    <color name="on_secondary">#20362A</color>
+    <color name="secondary_container">#354B40</color>
+    <color name="on_secondary_container">#D4E9DC</color>
+    <color name="surface">#111914</color>
+    <color name="surface_container_low">#17211A</color>
+    <color name="surface_container">#1D2820</color>
+    <color name="surface_container_high">#263229</color>
+    <color name="surface_container_highest">#303E34</color>
+    <color name="surface_variant">#3D4A41</color>
+    <color name="on_surface">#DFE8DF</color>
+    <color name="on_surface_variant">#BACBBE</color>
+    <color name="outline">#87998D</color>
+    <color name="outline_variant">#435248</color>
+    <color name="error">#FFB4AB</color>
+    <color name="on_error">#690005</color>
+    <color name="error_container">#93000A</color>
+    <color name="on_error_container">#FFDAD6</color>
+</resources>

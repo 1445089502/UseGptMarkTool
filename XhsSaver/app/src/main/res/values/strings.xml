@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 保存助手的应用名称与服务名称。 -->
+<resources>
+    <string name="app_name">笔记保存</string>
+    <string name="download_channel">文件保存进度</string>
+    <string name="overlay_channel">悬浮保存入口</string>
+</resources>
